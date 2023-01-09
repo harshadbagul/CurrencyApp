@@ -3,4 +3,25 @@ plugins {
     id 'com.android.application' version '7.3.1' apply false
     id 'com.android.library' version '7.3.1' apply false
     id 'org.jetbrains.kotlin.android' version '1.7.20' apply false
+    id("com.google.dagger.hilt.android") version "2.44" apply false
+    id('androidx.navigation.safeargs.kotlin') version '2.5.3' apply false
+}
+
+ext {
+    ext["targetSdk"] = 33
+    ext["minSdk"] = 21
+    ext["ktx"] = "1.7.0"
+    ext["appcompatVersion"] = "1.5.1"
+    ext["kotlin_version"] = "1.7.20"
+    ext["hilt_version"] = "2.44.2"
+    ext["nav_version"] = "2.5.3"
+    ext["material_version"] = "1.7.0"
+    ext["constraintlayout_version"] = "2.1.4"
+    ext["retrofit_version"] = "2.9.0"
+    ext["gson_version"] = "2.9.0"
+    ext["flow_version"] = "1.6.4"
+    ext["junit_version"] = "4.13.2"
+    ext["room_version"] = "2.4.3"
+    ext["recylerview_version"] = "1.2.1"
+    ext["card_version"] = "1.0.0"
 }
