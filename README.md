@@ -1,2 +1,2 @@
 # CurrencyApp
-Currency App
+Currency App & historic data
