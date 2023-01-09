@@ -1,18 +1,23 @@
 package com.andela.currencyapp.data.database
 
-import androidx.room.Dao
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import com.andela.currencyapp.data.netowork.model.CurrencyResponse
+import androidx.room.*
+import com.andela.currencyapp.data.netowork.model.Currency
 
 @Dao
 interface CurrencyDao {
 
-    //write down dao operation
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(currencies: List<Currency>)
+
+    @Query("SELECT * FROM Currency")
+    suspend fun getAllDbCurrencies(): List<Currency>
+
+    @Update
+    suspend fun updateDbCurrencies(currencies: List<Currency>)
 
 }
 
-@Database(entities = [CurrencyResponse::class], version = 1, exportSchema = false)
+@Database(entities = [Currency::class], version = 1, exportSchema = false)
 abstract class CurrencyDatabase : RoomDatabase() {
     abstract val currencyDao: CurrencyDao
 }
