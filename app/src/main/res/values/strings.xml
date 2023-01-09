@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CurrencyDemoApp</string>
+    <string name="app_name">CurrencyApp</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="button_detail">Details</string>
     <string name="details_fragment">Currency details Fragment</string>
@@ -11,5 +11,9 @@
     <string name="please_wait">Please wait …</string>
     <string name="default_error_text">Error</string>
     <string name="button_okay">Okay</string>
-
+    <string name="rate_is">Rate is :</string>
+    <string name="converted_amount_is">Converted amount is :</string>
+    <string name="label_historical_data_conversion">Historical Data with conversion</string>
+    <string name="label_popular_conversion">Popular Currencies</string>
+    <string name="default_text_from">1</string>
 </resources>

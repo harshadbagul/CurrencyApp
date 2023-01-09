@@ -13,7 +13,9 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.andela.currencyapp.MainActivity
+import com.andela.currencyapp.R
 import com.andela.currencyapp.data.netowork.model.Currency
 import com.andela.currencyapp.data.netowork.service.CurrencyState
 import com.andela.currencyapp.databinding.FragmentCurrencyBinding
@@ -44,6 +46,12 @@ class CurrencyFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.buttonDetail.setOnClickListener {
+            findNavController().navigate(
+                CurrencyFragmentDirections.actionCurrencyFragmentToCurrencyDetailsFragment(
+                    binding.spinnerFrom.selectedItem.toString(),
+                    binding.spinnerTo.selectedItem.toString(),
+                    binding.edittextFrom.text.toString()
+                ))
         }
 
         lifecycleScope.launchWhenStarted {
@@ -53,7 +61,7 @@ class CurrencyFragment : Fragment() {
         binding.edittextFrom.addTextChangedListener  (
             afterTextChanged = {
                 if (it.isNullOrBlank()){
-                    binding.edittextFrom.setText("1")
+                    binding.edittextFrom.setText(getString(R.string.default_text_from))
                 }
             },
             onTextChanged = { text, _, _, _ ->

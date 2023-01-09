@@ -8,7 +8,10 @@ import com.andela.currencyapp.data.netowork.service.CurrencyService
 import com.andela.currencyapp.data.netowork.service.CurrencyState
 import com.andela.currencyapp.data.utils.Constants.API_KEY_NAME
 import com.andela.currencyapp.data.utils.Constants.QUERY_PARAM_BASE
+import com.andela.currencyapp.data.utils.Constants.QUERY_PARAM_END_DATE
+import com.andela.currencyapp.data.utils.Constants.QUERY_PARAM_START_DATE
 import com.andela.currencyapp.data.utils.Constants.QUERY_PARAM_SYMBOLS
+import com.andela.currencyapp.data.utils.DateUtils
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
@@ -63,6 +66,20 @@ class CurrencyRepository @Inject constructor(
         }.flowOn(Dispatchers.IO)
     }
 
+    suspend fun getHistoricData(base:String,symbols: List<String>): kotlinx.coroutines.flow.Flow<CurrencyState> {
+        return flow {
+
+            val historicDataResponse = historicRates(base, symbols)
+            when(historicDataResponse.success){
+                true -> {
+                    //val data = historicDataResponse.rates as? Map<*, *>
+                    emit(CurrencyState.Success(historicDataResponse))
+                }
+
+                false -> { emit(CurrencyState.Error(historicDataResponse.errorResponse)) }
+            }
+        }.flowOn(Dispatchers.IO)
+    }
 
     private suspend fun latestRates(base:String, symbols:List<String>): CurrencyResponse? {
         val query = mapOf(
@@ -79,6 +96,22 @@ class CurrencyRepository @Inject constructor(
         } catch (e: java.lang.Exception){
             e.printStackTrace()
             return null
+        }
+    }
+
+    private suspend fun historicRates(base:String, symbols:List<String>): CurrencyResponse {
+        val query = mapOf(
+            API_KEY_NAME to BuildConfig.API_KEY,
+            QUERY_PARAM_START_DATE to DateUtils.getDateBeforeDays(-3),
+            QUERY_PARAM_END_DATE to DateUtils.getDateBeforeDays(-1),
+            QUERY_PARAM_BASE to base,
+            QUERY_PARAM_SYMBOLS to symbols.joinToString()
+        )
+
+        return withContext(Dispatchers.IO) {
+            currencyService.getHistoricData(
+                mapOf(API_KEY_NAME to BuildConfig.API_KEY),
+                query)
         }
     }
 
