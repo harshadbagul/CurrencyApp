@@ -8,8 +8,8 @@ import javax.inject.Inject
 
 @Suppress("UNCHECKED_CAST")
 class CurrencyViewModelFactory @Inject constructor(
-    val repository: CurrencyRepository,
-    val database: CurrencyDatabase
+    private val repository: CurrencyRepository,
+    private val database: CurrencyDatabase
 ): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CurrencyViewModel(repository,database) as T

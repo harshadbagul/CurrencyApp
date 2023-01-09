@@ -8,5 +8,8 @@
     <string name="title_network_alert_dialog">No Internet</string>
     <string name="message_network_alert_dialog"><![CDATA[Please connect with internet & try again.]]></string>
     <string name="default_from_text">1</string>
-    <string name="please_wait">Please wait ...</string>
+    <string name="please_wait">Please wait …</string>
+    <string name="default_error_text">Error</string>
+    <string name="button_okay">Okay</string>
+
 </resources>
