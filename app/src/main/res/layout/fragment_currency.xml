@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:id="@+id/spinner_from"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_32"
+        android:padding="@dimen/margin_8"
+        android:layout_marginBottom="286dp"
+        app:layout_constraintBottom_toBottomOf="@+id/button_swap"
+        app:layout_constraintEnd_toStartOf="@+id/button_swap"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/button_swap" />
+
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:id="@+id/spinner_to"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_32"
+        android:padding="@dimen/margin_8"
+        app:layout_constraintBottom_toBottomOf="@+id/button_swap"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_swap"
+        app:layout_constraintTop_toTopOf="@+id/button_swap" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_detail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_detail"
+        android:layout_marginBottom="@dimen/margin_16"
+        android:layout_marginTop="@dimen/margin_32"
+        app:layout_constraintTop_toBottomOf="@id/edittext_from"
+        app:layout_constraintEnd_toEndOf="@+id/edittext_to"
+        app:layout_constraintStart_toStartOf="@+id/edittext_from" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/button_swap"
+        android:layout_width="@dimen/dimen_32"
+        android:layout_height="@dimen/dimen_32"
+        android:tint="@color/purple_500"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline1"
+        app:srcCompat="@drawable/swap" />
+
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/edittext_from"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_32"
+        android:layout_marginStart="@dimen/margin_32"
+        android:background="@android:drawable/editbox_background_normal"
+        android:gravity="center"
+        android:hint="@string/from"
+        android:inputType="numberDecimal"
+        android:maxLines="1"
+        android:text="@string/default_from_text"
+        android:padding="@dimen/margin_16"
+        android:theme="@style/ThemeOverlay.Material3.TextInputEditText"
+        app:layout_constraintEnd_toStartOf="@+id/button_swap"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_from" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/edittext_to"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_32"
+        android:layout_marginEnd="@dimen/margin_32"
+        android:background="@android:drawable/editbox_background_normal"
+        android:gravity="center"
+        android:hint="@string/to"
+        android:inputType="numberDecimal"
+        android:maxLines="1"
+        android:padding="@dimen/margin_16"
+        android:theme="@style/ThemeOverlay.Material3.TextInputEditText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_swap"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_from" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.20" />
+
+    <include
+        android:id="@+id/ll_progress_bar"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        layout="@layout/progress_bar"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
