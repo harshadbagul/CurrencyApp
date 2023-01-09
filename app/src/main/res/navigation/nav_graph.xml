@@ -11,6 +11,34 @@
         android:label="fragment_currency"
         tools:layout="@layout/fragment_currency">
 
+        <action
+            android:id="@+id/action_currencyFragment_to_currencyDetailsFragment"
+            app:destination="@id/currencyDetailsFragment" />
+
+        <argument
+            android:name="from"
+            app:argType="string" />
+        <argument
+            android:name="to"
+            app:argType="string" />
+        <argument
+            android:name="amount"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/currencyDetailsFragment"
+        android:name="com.andela.currencyapp.ui.currencydetail.CurrencyDetailsFragment"
+        android:label="CurrencyDetailsFragment" >
+        <argument
+            android:name="from"
+            app:argType="string" />
+        <argument
+            android:name="to"
+            app:argType="string" />
+        <argument
+            android:name="amount"
+            app:argType="string" />
     </fragment>
 
 </navigation>

@@ -16,4 +16,10 @@ interface CurrencyService {
         @QueryMap options: Map<String, String>
     ): CurrencyResponse
 
+    @GET("timeseries")
+    suspend fun getHistoricData(
+        @HeaderMap headers: Map<String, String>,
+        @QueryMap options: Map<String, String>
+    ): CurrencyResponse
+
 }
