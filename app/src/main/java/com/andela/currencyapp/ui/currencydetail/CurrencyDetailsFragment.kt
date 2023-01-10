@@ -15,7 +15,10 @@ import com.andela.currencyapp.MainActivity
 import com.andela.currencyapp.R
 import com.andela.currencyapp.data.netowork.model.HistoricData
 import com.andela.currencyapp.data.netowork.service.CurrencyState
+import com.andela.currencyapp.data.utils.Utils
 import com.andela.currencyapp.data.utils.Utils.getPopularCurrencies
+import com.andela.currencyapp.data.utils.Utils.isNetworkAvailable
+import com.andela.currencyapp.data.utils.Utils.showErrorDialog
 import com.andela.currencyapp.databinding.FragmentCurrencyDetailsBinding
 import com.andela.currencyapp.ui.viewmodel.CurrencyViewModel
 import com.github.mikephil.charting.components.XAxis
@@ -51,15 +54,24 @@ class CurrencyDetailsFragment : Fragment() {
         lifecycleScope.launch {
             val currencies = listOf(args.to)
 
-            //call historic currencies data api
-            viewModel.getHistoricRates(args.from, currencies)
+            if (isNetworkAvailable(requireContext())) {
 
-            //Update popular currencies in recyclerview
-            val historicDataList = viewModel.getPopularCurrencyRates(
+                //call historic currencies data api
+                viewModel.getHistoricRates(args.from, currencies)
+                //Update popular currencies in recyclerview
+                val historicDataList = viewModel.getPopularCurrencyRates(
                     base = args.from,
                     fromAmount = args.amount,
                     popularCurrencies = getPopularCurrencies())
-            setPopularCurrencyAdapter(historicDataList)
+                setPopularCurrencyAdapter(historicDataList)
+
+            } else {
+                requireContext().showErrorDialog(
+                    title = getString(R.string.title_network_alert_dialog),
+                    message = getString(R.string.message_network_alert_dialog)
+                )
+            }
+
         }
 
     }
@@ -84,7 +96,7 @@ class CurrencyDetailsFragment : Fragment() {
                         is CurrencyState.Error -> {
                             binding.llProgressBar.linearLayout.visibility = View.GONE
                             val errorMessage = it.error?.info
-                            (activity as MainActivity).showErrorDialog(message = errorMessage)
+                            requireContext().showErrorDialog(message = errorMessage)
                         }
                         else -> {}
                     }
@@ -120,7 +132,7 @@ class CurrencyDetailsFragment : Fragment() {
 
         // Setting bar Data set
         val barDataSet = BarDataSet(entries.first, args.from).apply {
-            color = ContextCompat.getColor(activity as Context, R.color.purple_200)
+            color = ContextCompat.getColor(requireContext(), R.color.purple_200)
             valueTextColor = Color.BLACK
             valueTextSize = 12f
         }

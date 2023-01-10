@@ -11,10 +11,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.andela.currencyapp.MainActivity
+import com.andela.currencyapp.R
 import com.andela.currencyapp.data.netowork.model.Currency
 import com.andela.currencyapp.data.netowork.service.CurrencyState
 import com.andela.currencyapp.data.utils.Listeners.addTextWatcher
 import com.andela.currencyapp.data.utils.Listeners.selected
+import com.andela.currencyapp.data.utils.Utils.isNetworkAvailable
+import com.andela.currencyapp.data.utils.Utils.showErrorDialog
 import com.andela.currencyapp.databinding.FragmentCurrencyBinding
 import com.andela.currencyapp.ui.viewmodel.CurrencyViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,13 +46,12 @@ class CurrencyFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.buttonDetail.setOnClickListener {
-            navigateToDetailScreen()
+            if (isNetworkAvailable(requireContext()))
+                    navigateToDetailScreen()
         }
 
         // get symbols service
-        lifecycleScope.launchWhenStarted {
-            viewModel.getAllCurrencies()
-        }
+        getCurrenciesSymbols()
 
         // watch for text changes in from edittext
         binding.edittextFrom.addTextWatcher(activity as Context) { text ->
@@ -59,8 +61,8 @@ class CurrencyFragment : Fragment() {
             }
             lifecycleScope.launch {
                 val amount = viewModel.convertRate(
-                    fromAmount = text.toString(),
-                    toSymbol = binding.spinnerTo.selectedItem.toString()
+                    fromAmount = text,
+                    toSymbol = binding.spinnerTo.selectedItem.toString() ?: ""
                 )
                 binding.edittextTo.setText(amount.toString())
             }
@@ -104,6 +106,20 @@ class CurrencyFragment : Fragment() {
         }
 
     }
+
+    private fun getCurrenciesSymbols() {
+        lifecycleScope.launchWhenStarted {
+            if (isNetworkAvailable(requireContext())) {
+                viewModel.getAllCurrencies()
+            } else {
+                requireContext().showErrorDialog(
+                    title = getString(R.string.title_network_alert_dialog),
+                    message = getString(R.string.message_network_alert_dialog)
+                )
+            }
+        }
+    }
+
 
     /**
      *  navigation to detail screen
@@ -166,7 +182,7 @@ class CurrencyFragment : Fragment() {
                         is CurrencyState.Error -> {
                             binding.llProgressBar.linearLayout.visibility = View.GONE
                             val errorMessage = it.error?.info
-                            (activity as MainActivity).showErrorDialog(message = errorMessage)
+                            requireContext().showErrorDialog(message = errorMessage)
                         }
                         else -> {}
                     }
