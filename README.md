@@ -1,5 +1,5 @@
 # CurrencyApp
-Currency App & historic data
+Currency app is designed to helps customers to hand different currency conversions.
 
 - **Currency Conversion screen:**
     * Use can select From & To currency dropdowns show all available currencies.
@@ -22,9 +22,27 @@ For this project I have used:
 
 - **Kotlin** - This app is completely written in Kotlin.
 
-- **Android Architecture Components** - Lifecycle awareness has been achieved using a combination of Statemaps, ViewModels, Room database, Navigation component, Hilt, View binding.
+- **Android Architecture Components** - Lifecycle awareness has been achieved using a combination of Statemaps, ViewModels, Room database, Navigation component, Hilt, View binding, Junit.
 
 - **Screen compatibility** - This app is compatible up-to 10 inch screen size. 
 
 - **Screen Orientation**  - Handled the portrait & landscape mode & persistence of onConfigurationChanges.
+
+
+# Screenshots:
+<img src="screenshot/currency_from_spinner_list.png" width="320" height="640"> <img src="screenshot/currency_to_spinner_list.png" width="320" height="640">
+<img src="screenshot/currency_selection.png" width="320" height="640"> <img src="screenshot/currency_historic_data.png" width="320" height="640">
+
+
+# Libraries used
+
+* [Android Support Libraries](https://developer.android.com/topic/libraries/support-library/index.html)
+* [Retrofit](http://square.github.io/retrofit/)
+* [OkHttp](http://square.github.io/okhttp/)
+* [Room](https://developer.android.com/topic/libraries/architecture/room.html)
+* [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel.html)
+* [LiveData](https://developer.android.com/topic/libraries/architecture/livedata.html)
+* [Navigation](https://developer.android.com/guide/navigation/navigation-getting-started)
+* [MPChart](https://github.com/PhilJay/MPAndroidChart)
+* [DaggerHilt](https://dagger.dev/hilt/)
 
