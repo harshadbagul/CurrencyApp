@@ -62,7 +62,7 @@ class CurrencyFragment : Fragment() {
             lifecycleScope.launch {
                 val amount = viewModel.convertRate(
                     fromAmount = text,
-                    toSymbol = binding.spinnerTo.selectedItem.toString() ?: ""
+                    toSymbol = binding.spinnerTo.selectedItem?.toString() ?: ""
                 )
                 binding.edittextTo.setText(amount.toString())
             }
@@ -72,7 +72,7 @@ class CurrencyFragment : Fragment() {
         binding.buttonSwap.setOnClickListener {
             isSwap = true
             val from = binding.spinnerFrom.selectedItem.toString()
-            val to = binding.spinnerTo.selectedItem.toString()
+            val to = binding.spinnerTo.selectedItem?.toString()
 
             val fromIndex = mSymbolList.indexOfFirst { it.symbol == from }
             binding.spinnerTo.setSelection(fromIndex)
@@ -128,7 +128,7 @@ class CurrencyFragment : Fragment() {
         findNavController().navigate(
             CurrencyFragmentDirections.actionCurrencyFragmentToCurrencyDetailsFragment(
                 binding.spinnerFrom.selectedItem.toString(),
-                binding.spinnerTo.selectedItem.toString(),
+                binding.spinnerTo.selectedItem?.toString() ?: "",
                 binding.edittextFrom.text.toString()
             )
         )
@@ -204,7 +204,7 @@ class CurrencyFragment : Fragment() {
                         isSwap = false
                         val amount = viewModel.convertRate(
                             fromAmount = binding.edittextFrom.text.toString(),
-                            toSymbol = binding.spinnerTo.selectedItem.toString(),
+                            toSymbol = binding.spinnerTo.selectedItem?.toString() ?: "",
                             isSwap = false
                         )
                         binding.edittextTo.setText(amount.toString())
