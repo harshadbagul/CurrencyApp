@@ -5,19 +5,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Spinner
-import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.andela.currencyapp.MainActivity
-import com.andela.currencyapp.R
 import com.andela.currencyapp.data.netowork.model.Currency
 import com.andela.currencyapp.data.netowork.service.CurrencyState
+import com.andela.currencyapp.data.utils.Listeners.addTextWatcher
+import com.andela.currencyapp.data.utils.Listeners.selected
 import com.andela.currencyapp.databinding.FragmentCurrencyBinding
 import com.andela.currencyapp.ui.viewmodel.CurrencyViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,7 +23,7 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class CurrencyFragment : Fragment() {
 
-    private lateinit var binding : FragmentCurrencyBinding
+    private lateinit var binding: FragmentCurrencyBinding
     private var mSymbolList = listOf<Currency>()
     private var isSwap = false
 
@@ -46,44 +43,29 @@ class CurrencyFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.buttonDetail.setOnClickListener {
-            findNavController().navigate(
-                CurrencyFragmentDirections.actionCurrencyFragmentToCurrencyDetailsFragment(
-                    binding.spinnerFrom.selectedItem.toString(),
-                    binding.spinnerTo.selectedItem.toString(),
-                    binding.edittextFrom.text.toString()
-                ))
+            navigateToDetailScreen()
         }
 
+        // get symbols service
         lifecycleScope.launchWhenStarted {
             viewModel.getAllCurrencies()
         }
 
-        binding.edittextFrom.addTextChangedListener  (
-            afterTextChanged = {
-                if (it.isNullOrBlank()){
-                    binding.edittextFrom.setText(getString(R.string.default_text_from))
-                }
-            },
-            onTextChanged = { text, _, _, _ ->
-                if (isSwap){
-                    isSwap = false
-                    return@addTextChangedListener
-                }
-                lifecycleScope.launch {
-                    val amount = viewModel.convertRate(
-                        fromAmount = text.toString(),
-                        toSymbol = binding.spinnerTo.selectedItem.toString())
-                    binding.edittextTo.setText(amount.toString())
-                }
-            },
-            beforeTextChanged = {s, start, before, count->
+        // watch for text changes in from edittext
+        binding.edittextFrom.addTextWatcher(activity as Context) { text ->
+            if (isSwap) {
+                isSwap = false
+                return@addTextWatcher
             }
-        )
-
-
-
-        binding.edittextTo.addTextChangedListener {
+            lifecycleScope.launch {
+                val amount = viewModel.convertRate(
+                    fromAmount = text.toString(),
+                    toSymbol = binding.spinnerTo.selectedItem.toString()
+                )
+                binding.edittextTo.setText(amount.toString())
+            }
         }
+
 
         binding.buttonSwap.setOnClickListener {
             isSwap = true
@@ -96,14 +78,12 @@ class CurrencyFragment : Fragment() {
             val toIndex = mSymbolList.indexOfFirst { it.symbol == to }
             binding.spinnerFrom.setSelection(toIndex)
 
-
             lifecycleScope.launch {
                 viewModel.getLatestRates(binding.spinnerFrom.selectedItem.toString())
             }
-
         }
 
-
+        // change base currency & get latest rates
         binding.spinnerFrom.selected { selectedSymbol ->
             lifecycleScope.launch {
                 viewModel.getLatestRates(selectedSymbol)
@@ -111,11 +91,13 @@ class CurrencyFragment : Fragment() {
         }
 
 
+        // calculate conversion if To spinner value changed
         binding.spinnerTo.selected { selectedSymbol ->
             lifecycleScope.launch {
                 val amount = viewModel.convertRate(
                     fromAmount = binding.edittextFrom.text.toString(),
-                    toSymbol = selectedSymbol)
+                    toSymbol = selectedSymbol
+                )
 
                 binding.edittextTo.setText(amount.toString())
             }
@@ -123,7 +105,22 @@ class CurrencyFragment : Fragment() {
 
     }
 
+    /**
+     *  navigation to detail screen
+     */
+    private fun navigateToDetailScreen() {
+        findNavController().navigate(
+            CurrencyFragmentDirections.actionCurrencyFragmentToCurrencyDetailsFragment(
+                binding.spinnerFrom.selectedItem.toString(),
+                binding.spinnerTo.selectedItem.toString(),
+                binding.edittextFrom.text.toString()
+            )
+        )
+    }
 
+    /**
+     * Update the spinner adapter with currency data
+     */
     private fun updateCurrencySpinner(symbolList: List<Currency>) {
         mSymbolList = symbolList
         // From spinner update
@@ -152,37 +149,40 @@ class CurrencyFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
+        // consume the emitted values for allCurrenciesStateFlow
+        // accordingly take action based on CurrencyState
         lifecycleScope.launchWhenStarted {
             viewModel.allCurrenciesStateFlow
-                .collect{
-                    when(it){
-                        is CurrencyState.Loading ->{
+                .collect {
+                    when (it) {
+                        is CurrencyState.Loading -> {
                             binding.llProgressBar.linearLayout.visibility = View.VISIBLE
                         }
-                        is CurrencyState.Success ->{
+                        is CurrencyState.Success -> {
                             binding.llProgressBar.linearLayout.visibility = View.GONE
                             val symbolList = viewModel.getCurrencySymbolList(it.response.symbols)
                             updateCurrencySpinner(symbolList)
                         }
-                        is CurrencyState.Error ->{
+                        is CurrencyState.Error -> {
                             binding.llProgressBar.linearLayout.visibility = View.GONE
                             val errorMessage = it.error?.info
                             (activity as MainActivity).showErrorDialog(message = errorMessage)
                         }
-                        else -> { }
+                        else -> {}
                     }
                 }
         }
 
 
-
+        // consume the emitted values for latestRates
+        // accordingly take action based on CurrencyState
         lifecycleScope.launch {
             viewModel.latestRates.collect {
-                when(it){
-                    is CurrencyState.Loading ->{
+                when (it) {
+                    is CurrencyState.Loading -> {
                         binding.llProgressBar.linearLayout.visibility = View.VISIBLE
                     }
-                    is CurrencyState.Success ->{
+                    is CurrencyState.Success -> {
                         binding.llProgressBar.linearLayout.visibility = View.GONE
 
                         isSwap = false
@@ -194,25 +194,17 @@ class CurrencyFragment : Fragment() {
                         binding.edittextTo.setText(amount.toString())
 
                     }
-                    is CurrencyState.Error ->{
+                    is CurrencyState.Error -> {
                         binding.llProgressBar.linearLayout.visibility = View.GONE
                         val errorMessage = it.error?.info
                         (activity as MainActivity).showErrorDialog(message = errorMessage)
                     }
-                    else -> { }
+                    else -> {}
                 }
             }
         }
 
     }
 
-    private fun Spinner.selected(selection: (selectedItem: String) -> Unit) {
-        this.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selection((view as AppCompatTextView).text.toString())
-            }
-        }
-    }
 
 }

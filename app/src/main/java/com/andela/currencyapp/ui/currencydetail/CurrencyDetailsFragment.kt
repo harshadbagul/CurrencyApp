@@ -94,33 +94,45 @@ class CurrencyDetailsFragment : Fragment() {
     }
 
 
+    /**
+     * Set adapter for Historic data
+     */
     private fun setAdapter(historicDataList: List<HistoricData>) {
         historicDataList.reversed()
         mHistoricDataAdapter = CustomAdapter(historicDataList)
         binding.recyclerviewHistoricData.adapter = mHistoricDataAdapter
     }
 
+    /**
+     * Set adapter for popular currencies data
+     */
     private fun setPopularCurrencyAdapter(historicDataList: List<HistoricData>) {
         mPopularCurrenciesDataAdapter = CustomAdapter(historicDataList,false)
         binding.recyclerviewPopularData.adapter = mPopularCurrenciesDataAdapter
     }
 
 
+    /**
+     *  Set bar chart UI elements & properties
+     */
     private fun setBarChart(historicDataList: List<HistoricData>) {
         val entries = viewModel.getBarEntries(historicDataList)
 
+        // Setting bar Data set
         val barDataSet = BarDataSet(entries.first, args.from).apply {
             color = ContextCompat.getColor(activity as Context, R.color.purple_200)
             valueTextColor = Color.BLACK
             valueTextSize = 12f
         }
 
+        // Setting barDataSet to BarData
         val data = BarData(barDataSet).apply {
             barWidth = 0.5f
         }
 
         binding.barChart.data = data
 
+        // Setting barchart UI element
         binding.barChart.apply {
             setFitBars(true)
             description?.isEnabled = false
