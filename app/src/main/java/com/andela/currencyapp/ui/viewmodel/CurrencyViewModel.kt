@@ -23,6 +23,11 @@ class CurrencyViewModel @Inject constructor(
     private val currencyDatabase: CurrencyDatabase
 ) : ViewModel() {
 
+    // --> CurrencyState.DEFAULT > Default state for the StateFlow
+    // --> CurrencyState.Loading > show loading while calling service
+    // --> CurrencyState.Success > Emit values on success
+    // --> CurrencyState.Error > Emit error object & handle it in fragment
+
     val allCurrenciesStateFlow =
         MutableStateFlow<CurrencyState>(CurrencyState.DEFAULT)
 
@@ -66,6 +71,9 @@ class CurrencyViewModel @Inject constructor(
         return symbolList
     }
 
+    /**
+     * Logic for conversion of amount from base to excepted(TO) currency
+     */
     suspend fun convertRate(fromAmount: String, toSymbol: String, isSwap: Boolean = false): Double {
         var amount = 0.0
         val rates = currencyDatabase.currencyDao.getAllDbCurrencies()
@@ -86,6 +94,9 @@ class CurrencyViewModel @Inject constructor(
         return amount
     }
 
+    /**
+     * Get popular currency rate from Database
+     */
     suspend fun getPopularCurrencyRates(base: String, fromAmount:String, popularCurrencies: List<String>): ArrayList<HistoricData> {
         val rates = currencyDatabase.currencyDao.getAllDbCurrencies()
         val popularCurrenciesRate = rates.filter { it.symbol in popularCurrencies }
@@ -105,6 +116,9 @@ class CurrencyViewModel @Inject constructor(
         return historicData
     }
 
+    /**
+     * Convert historic data to model
+     */
     fun convertHistoricData(base:String, data: Any, fromAmount:String): List<HistoricData> {
         val symbolList = ArrayList<HistoricData>()
         val rates = data as? Map<*, *>
@@ -129,6 +143,9 @@ class CurrencyViewModel @Inject constructor(
     }
 
 
+    /**
+     *  prepare bar entries & date's arraylist
+     */
     fun getBarEntries(historicDataList: List<HistoricData>): Pair<ArrayList<BarEntry>, ArrayList<String>> {
         //setup bar entries
         val entries = arrayListOf<BarEntry>()

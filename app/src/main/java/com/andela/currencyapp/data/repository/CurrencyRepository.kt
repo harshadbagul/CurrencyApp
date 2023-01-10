@@ -12,7 +12,6 @@ import com.andela.currencyapp.data.utils.Constants.QUERY_PARAM_END_DATE
 import com.andela.currencyapp.data.utils.Constants.QUERY_PARAM_START_DATE
 import com.andela.currencyapp.data.utils.Constants.QUERY_PARAM_SYMBOLS
 import com.andela.currencyapp.data.utils.DateUtils
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -24,64 +23,96 @@ class CurrencyRepository @Inject constructor(
     private val currencyDatabase: CurrencyDatabase
 ) {
 
+    /**
+     *   Flow to produce all symbols from coroutines
+     *   @param
+     *   @return Flow<CurrencyState>
+     */
     suspend fun getAllCurrencies(): kotlinx.coroutines.flow.Flow<CurrencyState> {
         return flow {
             val response = getCurrencies()
-            when(response.success){
+            when (response.success) {
                 true -> {
                     emit(CurrencyState.Success(response))
                     val allCurrencies = convertAllCurrenciesToList(response.symbols)
                     currencyDatabase.currencyDao.insertAll(allCurrencies)
                 }
-                false -> { emit(CurrencyState.Error(response.errorResponse)) }
+                false -> {
+                    emit(CurrencyState.Error(response.errorResponse))
+                }
             }
         }.flowOn(Dispatchers.IO)
     }
 
+    /**
+     * Coroutine to fetch all symbols from api
+     */
     private suspend fun getCurrencies(): CurrencyResponse {
         return withContext(Dispatchers.IO) {
             currencyService.getAllCurrencies(mapOf(API_KEY_NAME to BuildConfig.API_KEY))
         }
     }
 
-    suspend fun getLatestRates(base:String): kotlinx.coroutines.flow.Flow<CurrencyState> {
+
+    /**
+     *   Flow to produce latest rates from coroutines
+     *   @param base - from spinner selection consider as base
+     *   @return Flow<CurrencyState>
+     */
+    suspend fun getLatestRates(base: String): kotlinx.coroutines.flow.Flow<CurrencyState> {
         return flow {
             // fetch all symbols from db
             val symbols = currencyDatabase.currencyDao.getAllDbCurrencies().map { it.symbol }
 
             // get latest rate rates for symbols
-            val response = latestRates(base,symbols)
+            val response = latestRates(base, symbols)
 
             response?.let { currencyResponse ->
-                when(currencyResponse.success){
+                when (currencyResponse.success) {
                     true -> {
                         emit(CurrencyState.Success(currencyResponse))
                         val rates = currencyResponse.rates as? Map<*, *>
                         currencyDatabase.currencyDao.updateDbCurrencies(convertAllRateToList(rates))
                     }
-                    false -> { emit(CurrencyState.Error(currencyResponse.errorResponse)) }
+                    false -> {
+                        emit(CurrencyState.Error(currencyResponse.errorResponse))
+                    }
                 }
             }
 
         }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun getHistoricData(base:String,symbols: List<String>): kotlinx.coroutines.flow.Flow<CurrencyState> {
+
+    /**
+     *   Flow to produce historic rates from coroutines
+     *   @param base - from spinner selection consider as base
+     *   @param symbols - input get historic data for symbols
+     *   @return Flow<CurrencyState>
+     */
+    suspend fun getHistoricData(
+        base: String,
+        symbols: List<String>
+    ): kotlinx.coroutines.flow.Flow<CurrencyState> {
         return flow {
 
             val historicDataResponse = historicRates(base, symbols)
-            when(historicDataResponse.success){
+            when (historicDataResponse.success) {
                 true -> {
-                    //val data = historicDataResponse.rates as? Map<*, *>
                     emit(CurrencyState.Success(historicDataResponse))
                 }
 
-                false -> { emit(CurrencyState.Error(historicDataResponse.errorResponse)) }
+                false -> {
+                    emit(CurrencyState.Error(historicDataResponse.errorResponse))
+                }
             }
         }.flowOn(Dispatchers.IO)
     }
 
-    private suspend fun latestRates(base:String, symbols:List<String>): CurrencyResponse? {
+    /**
+     * Coroutine to fetch latest rates for symbols from api
+     */
+    private suspend fun latestRates(base: String, symbols: List<String>): CurrencyResponse? {
         val query = mapOf(
             API_KEY_NAME to BuildConfig.API_KEY,
             QUERY_PARAM_BASE to base,
@@ -91,15 +122,19 @@ class CurrencyRepository @Inject constructor(
             withContext(Dispatchers.IO) {
                 currencyService.getLatestRates(
                     mapOf(API_KEY_NAME to BuildConfig.API_KEY),
-                    query)
+                    query
+                )
             }
-        } catch (e: java.lang.Exception){
+        } catch (e: java.lang.Exception) {
             e.printStackTrace()
             return null
         }
     }
 
-    private suspend fun historicRates(base:String, symbols:List<String>): CurrencyResponse {
+    /**
+     * Coroutine to fetch historic rates for symbols from api
+     */
+    private suspend fun historicRates(base: String, symbols: List<String>): CurrencyResponse {
         val query = mapOf(
             API_KEY_NAME to BuildConfig.API_KEY,
             QUERY_PARAM_START_DATE to DateUtils.getDateBeforeDays(-3),
@@ -111,7 +146,8 @@ class CurrencyRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             currencyService.getHistoricData(
                 mapOf(API_KEY_NAME to BuildConfig.API_KEY),
-                query)
+                query
+            )
         }
     }
 

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.andela.currencyapp.data.database.CurrencyDao
 import com.andela.currencyapp.data.database.CurrencyDatabase
+import com.andela.currencyapp.data.utils.Constants.DATABASE_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,7 +21,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             appContext,
             CurrencyDatabase::class.java,
-            "currency_db"
+            DATABASE_NAME
         ).fallbackToDestructiveMigration().build()
     }
 

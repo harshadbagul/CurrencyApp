@@ -11,7 +11,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     /**
-     *
+     *   show error for all fragments included in this conatiner
      */
     fun showErrorDialog(title:String?= null,
                         message: String? = getString(R.string.message_network_alert_dialog)){
