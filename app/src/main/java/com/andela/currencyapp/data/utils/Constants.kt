@@ -11,6 +11,6 @@ object Constants {
     const val QUERY_PARAM_END_DATE = "end_date"
 
     enum class PopularCurrencies{
-        USD,EUR,JPY,GBP,AUD,CAD,CHF,CNH,HKD,NZD,
+        USD,EUR,JPY,GBP,AUD,CAD,CHF,CNH,HKD,NZD,BHD
     }
 }

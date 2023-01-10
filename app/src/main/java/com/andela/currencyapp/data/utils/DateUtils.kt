@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object DateUtils {
-    private const val DATE_FORMAT = "yyyy-MM-dd"
+    const val DATE_FORMAT = "yyyy-MM-dd"
 
     fun getCurrentDate(): String {
         val date = System.currentTimeMillis()

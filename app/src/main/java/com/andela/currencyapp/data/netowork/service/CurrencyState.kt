@@ -7,6 +7,4 @@ sealed class CurrencyState {
     object Loading : CurrencyState()
     data class Success(val response: CurrencyResponse) : CurrencyState()
     data class Error(val error: ErrorResponse?) : CurrencyState()
-    object DEFAULT : CurrencyState()
-
 }
