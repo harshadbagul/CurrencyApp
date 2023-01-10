@@ -1,6 +1,5 @@
 package com.andela.currencyapp.ui.currencydetail
 
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,11 +10,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import com.andela.currencyapp.MainActivity
 import com.andela.currencyapp.R
+import com.andela.currencyapp.data.netowork.model.CurrencyResponse
 import com.andela.currencyapp.data.netowork.model.HistoricData
 import com.andela.currencyapp.data.netowork.service.CurrencyState
-import com.andela.currencyapp.data.utils.Utils
 import com.andela.currencyapp.data.utils.Utils.getPopularCurrencies
 import com.andela.currencyapp.data.utils.Utils.isNetworkAvailable
 import com.andela.currencyapp.data.utils.Utils.showErrorDialog
@@ -26,7 +24,6 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -51,19 +48,12 @@ class CurrencyDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenStarted {
             val currencies = listOf(args.to)
 
             if (isNetworkAvailable(requireContext())) {
-
                 //call historic currencies data api
                 viewModel.getHistoricRates(args.from, currencies)
-                //Update popular currencies in recyclerview
-                val historicDataList = viewModel.getPopularCurrencyRates(
-                    base = args.from,
-                    fromAmount = args.amount,
-                    popularCurrencies = getPopularCurrencies())
-                setPopularCurrencyAdapter(historicDataList)
 
             } else {
                 requireContext().showErrorDialog(
@@ -87,11 +77,7 @@ class CurrencyDetailsFragment : Fragment() {
                         }
                         is CurrencyState.Success -> {
                             binding.llProgressBar.linearLayout.visibility = View.GONE
-                            val historicDataList = viewModel.convertHistoricData(
-                                base = args.from, data = it.response.rates, fromAmount = args.amount
-                            )
-                            setAdapter(historicDataList)
-                            setBarChart(historicDataList)
+                            onSuccess(it.response)
                         }
                         is CurrencyState.Error -> {
                             binding.llProgressBar.linearLayout.visibility = View.GONE
@@ -103,6 +89,26 @@ class CurrencyDetailsFragment : Fragment() {
                 }
         }
 
+    }
+
+    /**
+     * perform operation on api success response
+     */
+    private suspend fun onSuccess(response: CurrencyResponse) {
+        val historicDataList = viewModel.convertHistoricData(
+            base = args.from, data = response.rates, fromAmount = args.amount
+        )
+
+        //Update popular currencies in recyclerview
+        val popularCurrencies = viewModel.getPopularCurrencyRates(
+            base = args.from,
+            fromAmount = args.amount,
+            popularCurrencies = getPopularCurrencies()
+        )
+
+        setPopularCurrencyAdapter(popularCurrencies)
+        setAdapter(historicDataList)
+        setBarChart(historicDataList)
     }
 
 

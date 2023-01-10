@@ -7,6 +7,7 @@
     <string name="to">to</string>
     <string name="title_network_alert_dialog">No Internet Connection</string>
     <string name="message_network_alert_dialog"><![CDATA[Please connect with internet & try again.]]></string>
+    <string name="message_something_went_wrong">Something went wrong.</string>
     <string name="default_from_text">1</string>
     <string name="please_wait">Please wait …</string>
     <string name="default_error_text">Error</string>

@@ -31,25 +31,35 @@ class CurrencyRepository @Inject constructor(
     suspend fun getAllCurrencies(): kotlinx.coroutines.flow.Flow<CurrencyState> {
         return flow {
             val response = getCurrencies()
-            when (response.success) {
-                true -> {
-                    emit(CurrencyState.Success(response))
-                    val allCurrencies = convertAllCurrenciesToList(response.symbols)
-                    currencyDatabase.currencyDao.insertAll(allCurrencies)
+            response?.let { resp ->
+                when (resp.success) {
+                    true -> {
+                        emit(CurrencyState.Success(resp))
+                        val allCurrencies = convertAllCurrenciesToList(resp.symbols)
+                        currencyDatabase.currencyDao.insertAll(allCurrencies)
+                    }
+                    false -> {
+                        emit(CurrencyState.Error(resp.errorResponse))
+                    }
                 }
-                false -> {
-                    emit(CurrencyState.Error(response.errorResponse))
-                }
+            } ?: run {
+                emit(CurrencyState.Error(null))
             }
+
         }.flowOn(Dispatchers.IO)
     }
 
     /**
      * Coroutine to fetch all symbols from api
      */
-    private suspend fun getCurrencies(): CurrencyResponse {
-        return withContext(Dispatchers.IO) {
-            currencyService.getAllCurrencies(mapOf(API_KEY_NAME to BuildConfig.API_KEY))
+    private suspend fun getCurrencies(): CurrencyResponse? {
+        return try {
+            withContext(Dispatchers.IO) {
+                currencyService.getAllCurrencies(mapOf(API_KEY_NAME to BuildConfig.API_KEY))
+            }
+        }catch (e: Exception){
+            e.printStackTrace()
+            return null
         }
     }
 
@@ -67,17 +77,19 @@ class CurrencyRepository @Inject constructor(
             // get latest rate rates for symbols
             val response = latestRates(base, symbols)
 
-            response?.let { currencyResponse ->
-                when (currencyResponse.success) {
+            response?.let {
+                when (response.success) {
                     true -> {
-                        emit(CurrencyState.Success(currencyResponse))
-                        val rates = currencyResponse.rates as? Map<*, *>
+                        emit(CurrencyState.Success(response))
+                        val rates = response.rates as? Map<*, *>
                         currencyDatabase.currencyDao.updateDbCurrencies(convertAllRateToList(rates))
                     }
                     false -> {
-                        emit(CurrencyState.Error(currencyResponse.errorResponse))
+                        emit(CurrencyState.Error(response.errorResponse))
                     }
                 }
+            } ?: run {
+                emit(CurrencyState.Error(null))
             }
 
         }.flowOn(Dispatchers.IO)
@@ -97,15 +109,20 @@ class CurrencyRepository @Inject constructor(
         return flow {
 
             val historicDataResponse = historicRates(base, symbols)
-            when (historicDataResponse.success) {
-                true -> {
-                    emit(CurrencyState.Success(historicDataResponse))
-                }
+            historicDataResponse?.let {
+                when (historicDataResponse.success) {
+                    true -> {
+                        emit(CurrencyState.Success(historicDataResponse))
+                    }
 
-                false -> {
-                    emit(CurrencyState.Error(historicDataResponse.errorResponse))
+                    false -> {
+                        emit(CurrencyState.Error(historicDataResponse.errorResponse))
+                    }
                 }
+            } ?: run {
+                emit(CurrencyState.Error(null))
             }
+
         }.flowOn(Dispatchers.IO)
     }
 
@@ -134,7 +151,7 @@ class CurrencyRepository @Inject constructor(
     /**
      * Coroutine to fetch historic rates for symbols from api
      */
-    private suspend fun historicRates(base: String, symbols: List<String>): CurrencyResponse {
+    private suspend fun historicRates(base: String, symbols: List<String>): CurrencyResponse? {
         val query = mapOf(
             API_KEY_NAME to BuildConfig.API_KEY,
             QUERY_PARAM_START_DATE to DateUtils.getDateBeforeDays(-3),
@@ -143,11 +160,15 @@ class CurrencyRepository @Inject constructor(
             QUERY_PARAM_SYMBOLS to symbols.joinToString()
         )
 
-        return withContext(Dispatchers.IO) {
-            currencyService.getHistoricData(
-                mapOf(API_KEY_NAME to BuildConfig.API_KEY),
-                query
-            )
+        return try {
+            withContext(Dispatchers.IO) {
+                currencyService.getHistoricData(
+                    mapOf(API_KEY_NAME to BuildConfig.API_KEY),
+                    query
+                )
+            }
+        }catch (e: Exception){
+            return null
         }
     }
 

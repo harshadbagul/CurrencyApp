@@ -22,11 +22,12 @@ object Utils {
 
 
     fun Context.showErrorDialog(
-                        title:String?= null,
-                        message: String? = this.getString(R.string.message_network_alert_dialog)){
+                        title:String? = null,
+                        message: String? = null)
+    {
         val alertDialog: AlertDialog = AlertDialog.Builder(this).create()
         alertDialog.setTitle(title ?: this.getString(R.string.default_error_text))
-        alertDialog.setMessage(message)
+        alertDialog.setMessage(message ?: this.getString(R.string.message_something_went_wrong))
         alertDialog.setButton(
             AlertDialog.BUTTON_POSITIVE, this.getString(R.string.button_okay)
         ) { dialog, _ -> dialog.dismiss() }
