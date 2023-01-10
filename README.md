@@ -31,7 +31,7 @@ For this project I have used:
 
 # Screenshots:
 <img src="screenshot/currency_from_spinner_list.png" width="320" height="640"> <img src="screenshot/currency_to_spinner_list.png" width="320" height="640">
-<img src="screenshot/currency_selection.png" width="320" height="640"> <img src="screenshot/currency_historic_data.png" width="320" height="640">
+<img src="screenshot/currency_selection.png" width="320" height="640"> <img src="screenshot/historic_data_2.png" width="320" height="640">
 
 
 # Libraries used
