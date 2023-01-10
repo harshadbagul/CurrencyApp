@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.andela.currencyapp.MainActivity
@@ -30,7 +30,8 @@ class CurrencyFragment : Fragment() {
     private var mSymbolList = listOf<Currency>()
     private var isSwap = false
 
-    private val viewModel: CurrencyViewModel by viewModels()
+    private val viewModel by activityViewModels<CurrencyViewModel>()
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,55 +47,46 @@ class CurrencyFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.buttonDetail.setOnClickListener {
-            if (isNetworkAvailable(requireContext()))
-                    navigateToDetailScreen()
+            if (isNetworkAvailable(requireContext())){
+                viewModel.updateReloadFlag(false)
+                navigateToDetailScreen()
+            }
         }
 
-        // get symbols service
-        getCurrenciesSymbols()
+        // fetch all currency symbols
+        if (viewModel.loadCurrencyData.value){
+            getCurrenciesSymbols()
+        }
 
         // watch for text changes in from edittext
-        binding.edittextFrom.addTextWatcher(activity as Context) { text ->
-            if (isSwap) {
-                isSwap = false
-                return@addTextWatcher
-            }
-            lifecycleScope.launch {
-                val amount = viewModel.convertRate(
-                    fromAmount = text,
-                    toSymbol = binding.spinnerTo.selectedItem.toString() ?: ""
-                )
-                binding.edittextTo.setText(amount.toString())
-            }
-        }
-
+        editTextWatcher()
 
         binding.buttonSwap.setOnClickListener {
             isSwap = true
-            val from = binding.spinnerFrom.selectedItem.toString()
-            val to = binding.spinnerTo.selectedItem.toString()
-
-            val fromIndex = mSymbolList.indexOfFirst { it.symbol == from }
-            binding.spinnerTo.setSelection(fromIndex)
-
-            val toIndex = mSymbolList.indexOfFirst { it.symbol == to }
-            binding.spinnerFrom.setSelection(toIndex)
-
+            binding.spinnerTo.setSelection(viewModel.fromSelection.value)
+            binding.spinnerFrom.setSelection(viewModel.toSelection.value)
             lifecycleScope.launch {
-                viewModel.getLatestRates(binding.spinnerFrom.selectedItem.toString())
+                 viewModel.getLatestRates(binding.spinnerFrom.selectedItem.toString())
             }
         }
 
         // change base currency & get latest rates
-        binding.spinnerFrom.selected { selectedSymbol ->
+        binding.spinnerFrom.selected { selectedSymbol, position ->
+            // update from spinner selection in viewmodel
+            viewModel.updateFromSelection(position)
+
             lifecycleScope.launch {
-                viewModel.getLatestRates(selectedSymbol)
+                if (viewModel.loadCurrencyData.value)
+                     viewModel.getLatestRates(selectedSymbol)
             }
         }
 
 
         // calculate conversion if To spinner value changed
-        binding.spinnerTo.selected { selectedSymbol ->
+        binding.spinnerTo.selected { selectedSymbol, position ->
+            // update to spinner selection in viewmodel
+            viewModel.updateToSelection(position)
+
             lifecycleScope.launch {
                 val amount = viewModel.convertRate(
                     fromAmount = binding.edittextFrom.text.toString(),
@@ -107,9 +99,30 @@ class CurrencyFragment : Fragment() {
 
     }
 
+    /**
+     * edit text watcher for from edittext field
+     */
+    private fun editTextWatcher() {
+        binding.edittextFrom.addTextWatcher(activity as Context) { text ->
+            if (isSwap) {
+                isSwap = false
+                return@addTextWatcher
+            }
+            lifecycleScope.launch {
+                val amount = viewModel.convertRate(
+                    fromAmount = text,
+                    toSymbol = binding.spinnerTo.selectedItem?.toString() ?: ""
+                )
+                binding.edittextTo.setText(amount.toString())
+            }
+        }
+    }
+
+
     private fun getCurrenciesSymbols() {
         lifecycleScope.launchWhenStarted {
             if (isNetworkAvailable(requireContext())) {
+                println("######## getAllCurrencies")
                 viewModel.getAllCurrencies()
             } else {
                 requireContext().showErrorDialog(
@@ -128,7 +141,7 @@ class CurrencyFragment : Fragment() {
         findNavController().navigate(
             CurrencyFragmentDirections.actionCurrencyFragmentToCurrencyDetailsFragment(
                 binding.spinnerFrom.selectedItem.toString(),
-                binding.spinnerTo.selectedItem.toString(),
+                binding.spinnerTo.selectedItem?.toString() ?: "",
                 binding.edittextFrom.text.toString()
             )
         )
@@ -146,9 +159,9 @@ class CurrencyFragment : Fragment() {
             symbolList
         )
         binding.spinnerFrom.adapter = mSymbolFromAdapter
+        // default selection for from spinner
+        binding.spinnerFrom.setSelection(viewModel.fromSelection.value)
 
-        // default selection for from spinner - first item
-        binding.spinnerTo.setSelection(0)
 
         // TO spinner update
         val mSymbolToAdapter = ArrayAdapter(
@@ -157,9 +170,9 @@ class CurrencyFragment : Fragment() {
             symbolList
         )
         binding.spinnerTo.adapter = mSymbolToAdapter
+        // default selection for To spinner
+        binding.spinnerTo.setSelection(viewModel.toSelection.value)
 
-        // default selection for To spinner - second item
-        binding.spinnerTo.setSelection(1)
     }
 
     override fun onResume() {
@@ -184,7 +197,6 @@ class CurrencyFragment : Fragment() {
                             val errorMessage = it.error?.info
                             requireContext().showErrorDialog(message = errorMessage)
                         }
-                        else -> {}
                     }
                 }
         }
@@ -204,7 +216,7 @@ class CurrencyFragment : Fragment() {
                         isSwap = false
                         val amount = viewModel.convertRate(
                             fromAmount = binding.edittextFrom.text.toString(),
-                            toSymbol = binding.spinnerTo.selectedItem.toString(),
+                            toSymbol = binding.spinnerTo.selectedItem?.toString() ?: "",
                             isSwap = false
                         )
                         binding.edittextTo.setText(amount.toString())
@@ -215,7 +227,6 @@ class CurrencyFragment : Fragment() {
                         val errorMessage = it.error?.info
                         (activity as MainActivity).showErrorDialog(message = errorMessage)
                     }
-                    else -> {}
                 }
             }
         }

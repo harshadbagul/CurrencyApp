@@ -33,11 +33,13 @@ object Listeners {
     /**
      *  Extension fun to listen the spinner click event
      */
-    fun Spinner.selected(selection: (selectedItem: String) -> Unit) {
+    fun Spinner.selected(selection: (selectedItem: String, position: Int) -> Unit) {
         this.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selection((view as AppCompatTextView).text.toString())
+                view?.let {
+                    selection((it as AppCompatTextView).text.toString(), position)
+                }
             }
         }
     }

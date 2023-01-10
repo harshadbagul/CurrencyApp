@@ -10,6 +10,7 @@ import com.andela.currencyapp.data.netowork.model.Rate
 import com.andela.currencyapp.data.netowork.service.CurrencyState
 import com.andela.currencyapp.data.repository.CurrencyRepository
 import com.andela.currencyapp.data.utils.DateUtils
+import com.andela.currencyapp.data.utils.Utils
 import com.github.mikephil.charting.data.BarEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -28,21 +29,36 @@ class CurrencyViewModel @Inject constructor(
     // --> CurrencyState.Success > Emit values on success
     // --> CurrencyState.Error > Emit error object & handle it in fragment
 
-    val allCurrenciesStateFlow =
-        MutableStateFlow<CurrencyState>(CurrencyState.DEFAULT)
+    private val _allCurrenciesStateFlow = MutableStateFlow<CurrencyState>(CurrencyState.Loading)
+    val allCurrenciesStateFlow: StateFlow<CurrencyState>
+        get() = _allCurrenciesStateFlow
 
-    val latestRates =
-        MutableStateFlow<CurrencyState>(CurrencyState.DEFAULT)
+    private val _latestRates = MutableStateFlow<CurrencyState>(CurrencyState.Loading)
+    val latestRates: StateFlow<CurrencyState>
+        get() = _latestRates
 
-    val historicRates =
-        MutableStateFlow<CurrencyState>(CurrencyState.DEFAULT)
+    private val _historicRates = MutableStateFlow<CurrencyState>(CurrencyState.Loading)
+    val historicRates: StateFlow<CurrencyState>
+        get() = _historicRates
+
+    private val _loadCurrencyData = MutableStateFlow(true)
+    val loadCurrencyData: StateFlow<Boolean>
+        get() = _loadCurrencyData
+
+    private val _fromSelection = MutableStateFlow(0)
+    val fromSelection: StateFlow<Int>
+        get() = _fromSelection
+
+    private val _toSelection = MutableStateFlow(0)
+    val toSelection: StateFlow<Int>
+        get() = _toSelection
 
 
     suspend fun getAllCurrencies() {
         currencyRepository.getAllCurrencies()
             .flowOn(Dispatchers.IO)
             .onStart { emit(CurrencyState.Loading) }
-            .onEach { this.allCurrenciesStateFlow.value = it }
+            .onEach { _allCurrenciesStateFlow.value = it }
             .launchIn(viewModelScope)
 
     }
@@ -51,7 +67,7 @@ class CurrencyViewModel @Inject constructor(
         currencyRepository.getLatestRates(from)
             .flowOn(Dispatchers.IO)
             .onStart { emit(CurrencyState.Loading) }
-            .onEach { this.latestRates.value = it }
+            .onEach { _latestRates.value = it }
             .launchIn(viewModelScope)
     }
 
@@ -59,7 +75,7 @@ class CurrencyViewModel @Inject constructor(
         currencyRepository.getHistoricData(from, symbols)
             .flowOn(Dispatchers.IO)
             .onStart { emit(CurrencyState.Loading) }
-            .onEach { this.historicRates.value = it }
+            .onEach { _historicRates.value = it }
             .launchIn(viewModelScope)
     }
 
@@ -97,7 +113,11 @@ class CurrencyViewModel @Inject constructor(
     /**
      * Get popular currency rate from Database
      */
-    suspend fun getPopularCurrencyRates(base: String, fromAmount:String, popularCurrencies: List<String>): ArrayList<HistoricData> {
+    suspend fun getPopularCurrencyRates(
+        base: String,
+        fromAmount: String,
+        popularCurrencies: List<String>
+    ): ArrayList<HistoricData> {
         val rates = currencyDatabase.currencyDao.getAllDbCurrencies()
         val popularCurrenciesRate = rates.filter { it.symbol in popularCurrencies }
 
@@ -119,17 +139,19 @@ class CurrencyViewModel @Inject constructor(
     /**
      * Convert historic data to model
      */
-    fun convertHistoricData(base:String, data: Any, fromAmount:String): List<HistoricData> {
+    fun convertHistoricData(base: String, data: Any, fromAmount: String): List<HistoricData> {
         val symbolList = ArrayList<HistoricData>()
         val rates = data as? Map<*, *>
 
         rates?.map {
-            symbolList.add( HistoricData(
-                date = it.key as String,
-                base = base,
-                fromAmount = fromAmount ,
-                historicRate = getHistoricRate(it.value)
-            ))
+            symbolList.add(
+                HistoricData(
+                    date = it.key as String,
+                    base = base,
+                    fromAmount = fromAmount,
+                    historicRate = getHistoricRate(it.value)
+                )
+            )
         }
 
         return symbolList
@@ -146,19 +168,40 @@ class CurrencyViewModel @Inject constructor(
     /**
      *  prepare bar entries & date's arraylist
      */
-    fun getBarEntries(historicDataList: List<HistoricData>): Pair<ArrayList<BarEntry>, ArrayList<String>> {
+    fun getBarEntries(historicDataList: List<HistoricData>): Pair<List<BarEntry>, List<String>> {
         //setup bar entries
         val entries = arrayListOf<BarEntry>()
-        historicDataList.take(3).mapIndexed { index, historicData ->
-            entries.add(BarEntry(index + 1f, historicData.historicRate.dateRate.toFloat()))
+        val xAxis = arrayListOf<String>()
+        val yAxis = arrayListOf<String>()
+
+        List(historicDataList.size) { index ->
+            xAxis.add((index * 1f).toString())
+        }
+        for (i in historicDataList.reversed()) {
+            yAxis.add(i.historicRate.dateRate.toString())
+        }
+        for (i in 0 until xAxis.size){
+            entries.add(BarEntry(xAxis[i].toFloat(), yAxis[i].toFloat()))
         }
 
         //setup dates
         val dates = arrayListOf<String>()
-        historicDataList.take(4).mapIndexed { index, historicData ->
+        historicDataList.mapIndexed { index, historicData ->
             dates.add(historicData.date)
         }
 
-        return Pair(entries, dates)
+        return Pair(entries, dates.sortedWith(Utils.compareByString))
+    }
+
+    fun updateFromSelection(fromIndex: Int) {
+        _fromSelection.value = fromIndex
+    }
+
+    fun updateToSelection(toIndex: Int) {
+        _toSelection.value = toIndex
+    }
+
+    fun updateReloadFlag(isLoad: Boolean) {
+        _loadCurrencyData.value = isLoad
     }
 }

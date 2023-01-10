@@ -7,6 +7,9 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.appcompat.app.AlertDialog
 import com.andela.currencyapp.R
+import com.andela.currencyapp.data.netowork.model.HistoricData
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.collections.ArrayList
 
 object Utils {
@@ -19,6 +22,11 @@ object Utils {
         }
         return popularCurrencies
     }
+
+
+    val compareByHistoricData = compareByDescending<HistoricData> { SimpleDateFormat(DateUtils.DATE_FORMAT, Locale.getDefault()).parse(it.date) }
+
+    val compareByString = compareByDescending<String> { SimpleDateFormat(DateUtils.DATE_FORMAT, Locale.getDefault()).parse(it) }
 
 
     fun Context.showErrorDialog(

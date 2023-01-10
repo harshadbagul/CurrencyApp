@@ -7,13 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.andela.currencyapp.R
 import com.andela.currencyapp.data.netowork.model.CurrencyResponse
 import com.andela.currencyapp.data.netowork.model.HistoricData
 import com.andela.currencyapp.data.netowork.service.CurrencyState
+import com.andela.currencyapp.data.utils.Utils
 import com.andela.currencyapp.data.utils.Utils.getPopularCurrencies
 import com.andela.currencyapp.data.utils.Utils.isNetworkAvailable
 import com.andela.currencyapp.data.utils.Utils.showErrorDialog
@@ -24,6 +25,8 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import dagger.hilt.android.AndroidEntryPoint
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 @AndroidEntryPoint
@@ -35,8 +38,8 @@ class CurrencyDetailsFragment : Fragment() {
 
     private val args: CurrencyDetailsFragmentArgs by navArgs()
 
-    private val viewModel: CurrencyViewModel by viewModels()
-
+    //private val viewModel: CurrencyViewModel by viewModels()
+    private val viewModel by activityViewModels<CurrencyViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -84,7 +87,6 @@ class CurrencyDetailsFragment : Fragment() {
                             val errorMessage = it.error?.info
                             requireContext().showErrorDialog(message = errorMessage)
                         }
-                        else -> {}
                     }
                 }
         }
@@ -112,12 +114,14 @@ class CurrencyDetailsFragment : Fragment() {
     }
 
 
+
     /**
      * Set adapter for Historic data
      */
     private fun setAdapter(historicDataList: List<HistoricData>) {
-        historicDataList.reversed()
-        mHistoricDataAdapter = CustomAdapter(historicDataList)
+        val list = historicDataList.sortedWith(Utils.compareByHistoricData)
+
+        mHistoricDataAdapter = CustomAdapter(list)
         binding.recyclerviewHistoricData.adapter = mHistoricDataAdapter
     }
 
@@ -155,7 +159,7 @@ class CurrencyDetailsFragment : Fragment() {
             setFitBars(true)
             description?.isEnabled = false
             xAxis?.valueFormatter = IndexAxisValueFormatter(entries.second)
-            xAxis?.granularity = 0.5f
+            xAxis?.granularity = 1f
             xAxis?.isGranularityEnabled = true
             xAxis?.position = XAxis.XAxisPosition.BOTTOM
         }
