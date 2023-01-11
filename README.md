@@ -35,6 +35,7 @@ For this project I have used:
 <img src="screenshot/currency_selection.png" width="320" height="640"> <img src="screenshot/historic_data_2.png" width="320" height="640">
 <img src="screenshot/subscription_error.png" width="320" height="640"> <img src="screenshot/no_internet_connection.png" width="320" height="640"> <img src="screenshot/no_result_error.png" width="320" height="640">
 
+
 # Libraries used
 
 * [Android Support Libraries](https://developer.android.com/topic/libraries/support-library/index.html)
@@ -46,4 +47,6 @@ For this project I have used:
 * [Navigation](https://developer.android.com/guide/navigation/navigation-getting-started)
 * [MPChart](https://github.com/PhilJay/MPAndroidChart)
 * [DaggerHilt](https://dagger.dev/hilt/)
+* [JUnit](https://developer.android.com/training/testing/local-tests)
+* [JUnit]
 
