@@ -55,7 +55,7 @@ class CurrencyFragment : Fragment() {
 
         // fetch all currency symbols
         if (viewModel.loadCurrencyData.value){
-            getCurrenciesSymbols()
+            getCurrencySymbols()
         }
 
         // watch for text changes in from edittext
@@ -99,81 +99,6 @@ class CurrencyFragment : Fragment() {
 
     }
 
-    /**
-     * edit text watcher for from edittext field
-     */
-    private fun editTextWatcher() {
-        binding.edittextFrom.addTextWatcher(activity as Context) { text ->
-            if (isSwap) {
-                isSwap = false
-                return@addTextWatcher
-            }
-            lifecycleScope.launch {
-                val amount = viewModel.convertRate(
-                    fromAmount = text,
-                    toSymbol = binding.spinnerTo.selectedItem?.toString() ?: ""
-                )
-                binding.edittextTo.setText(amount.toString())
-            }
-        }
-    }
-
-
-    private fun getCurrenciesSymbols() {
-        lifecycleScope.launchWhenStarted {
-            if (isNetworkAvailable(requireContext())) {
-                println("######## getAllCurrencies")
-                viewModel.getAllCurrencies()
-            } else {
-                requireContext().showErrorDialog(
-                    title = getString(R.string.title_network_alert_dialog),
-                    message = getString(R.string.message_network_alert_dialog)
-                )
-            }
-        }
-    }
-
-
-    /**
-     *  navigation to detail screen
-     */
-    private fun navigateToDetailScreen() {
-        findNavController().navigate(
-            CurrencyFragmentDirections.actionCurrencyFragmentToCurrencyDetailsFragment(
-                binding.spinnerFrom.selectedItem.toString(),
-                binding.spinnerTo.selectedItem?.toString() ?: "",
-                binding.edittextFrom.text.toString()
-            )
-        )
-    }
-
-    /**
-     * Update the spinner adapter with currency data
-     */
-    private fun updateCurrencySpinner(symbolList: List<Currency>) {
-        mSymbolList = symbolList
-        // From spinner update
-        val mSymbolFromAdapter = ArrayAdapter(
-            activity as Context,
-            android.R.layout.simple_dropdown_item_1line,
-            symbolList
-        )
-        binding.spinnerFrom.adapter = mSymbolFromAdapter
-        // default selection for from spinner
-        binding.spinnerFrom.setSelection(viewModel.fromSelection.value)
-
-
-        // TO spinner update
-        val mSymbolToAdapter = ArrayAdapter(
-            activity as Context,
-            android.R.layout.simple_dropdown_item_1line,
-            symbolList
-        )
-        binding.spinnerTo.adapter = mSymbolToAdapter
-        // default selection for To spinner
-        binding.spinnerTo.setSelection(viewModel.toSelection.value)
-
-    }
 
     override fun onResume() {
         super.onResume()
@@ -234,4 +159,78 @@ class CurrencyFragment : Fragment() {
     }
 
 
+    /**
+     * edit text watcher for from edittext field
+     */
+    private fun editTextWatcher() {
+        binding.edittextFrom.addTextWatcher(activity as Context) { text ->
+            if (isSwap) {
+                isSwap = false
+                return@addTextWatcher
+            }
+            lifecycleScope.launch {
+                val amount = viewModel.convertRate(
+                    fromAmount = text,
+                    toSymbol = binding.spinnerTo.selectedItem?.toString() ?: ""
+                )
+                binding.edittextTo.setText(amount.toString())
+            }
+        }
+    }
+
+
+    private fun getCurrencySymbols() {
+        lifecycleScope.launchWhenStarted {
+            if (isNetworkAvailable(requireContext())) {
+                viewModel.getAllCurrencies()
+            } else {
+                requireContext().showErrorDialog(
+                    title = getString(R.string.title_network_alert_dialog),
+                    message = getString(R.string.message_network_alert_dialog)
+                )
+            }
+        }
+    }
+
+
+    /**
+     *  navigation to detail screen
+     */
+    private fun navigateToDetailScreen() {
+        findNavController().navigate(
+            CurrencyFragmentDirections.actionCurrencyFragmentToCurrencyDetailsFragment(
+                binding.spinnerFrom.selectedItem.toString(),
+                binding.spinnerTo.selectedItem?.toString() ?: "",
+                binding.edittextFrom.text.toString()
+            )
+        )
+    }
+
+    /**
+     * Update the spinner adapter with currency data
+     */
+    private fun updateCurrencySpinner(symbolList: List<Currency>) {
+        mSymbolList = symbolList
+        // From spinner update
+        val mSymbolFromAdapter = ArrayAdapter(
+            activity as Context,
+            android.R.layout.simple_dropdown_item_1line,
+            symbolList
+        )
+        binding.spinnerFrom.adapter = mSymbolFromAdapter
+        // default selection for from spinner
+        binding.spinnerFrom.setSelection(viewModel.fromSelection.value)
+
+
+        // TO spinner update
+        val mSymbolToAdapter = ArrayAdapter(
+            activity as Context,
+            android.R.layout.simple_dropdown_item_1line,
+            symbolList
+        )
+        binding.spinnerTo.adapter = mSymbolToAdapter
+        // default selection for To spinner
+        binding.spinnerTo.setSelection(viewModel.toSelection.value)
+
+    }
 }

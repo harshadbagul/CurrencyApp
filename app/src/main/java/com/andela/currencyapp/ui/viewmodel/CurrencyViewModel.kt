@@ -24,7 +24,6 @@ class CurrencyViewModel @Inject constructor(
     private val currencyDatabase: CurrencyDatabase
 ) : ViewModel() {
 
-    // --> CurrencyState.DEFAULT > Default state for the StateFlow
     // --> CurrencyState.Loading > show loading while calling service
     // --> CurrencyState.Success > Emit values on success
     // --> CurrencyState.Error > Emit error object & handle it in fragment

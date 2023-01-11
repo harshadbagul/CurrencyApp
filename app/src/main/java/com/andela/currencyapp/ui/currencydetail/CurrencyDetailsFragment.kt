@@ -38,7 +38,6 @@ class CurrencyDetailsFragment : Fragment() {
 
     private val args: CurrencyDetailsFragmentArgs by navArgs()
 
-    //private val viewModel: CurrencyViewModel by viewModels()
     private val viewModel by activityViewModels<CurrencyViewModel>()
 
     override fun onCreateView(
