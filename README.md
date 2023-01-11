@@ -1,6 +1,8 @@
 # CurrencyApp
 Currency app is designed to helps customers to hand different currency conversions.
 
+ To complete this assignment I was more focused at architecture & flow of the app & less at UI(design).
+
 - **Currency Conversion screen:**
     * Use can select From & To currency dropdowns show all available currencies.
     * User can enter input either in from or to edittext (default text for from edittext is 1).
