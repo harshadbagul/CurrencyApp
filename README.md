@@ -32,10 +32,10 @@ For this project I have used:
 
 
 # Screenshots:
-<img src="screenshot/currency_from_spinner_list.png" width="280" height="520"> <img src="screenshot/currency_to_spinner_list.png" width="300" height="580">
-<img src="screenshot/currency_landscape.png" width="580" height="280">
-<img src="screenshot/currency_selection.png" width="320" height="640"> <img src="screenshot/historic_data_2.png" width="320" height="640">
-<img src="screenshot/subscription_error.png" width="320" height="640"> <img src="screenshot/no_internet_connection.png" width="300" height="580"> <img src="screenshot/no_result_error.png" width="320" height="640">
+<img src="screenshot/currency_from_spinner_list.png" width="240" height="560"> <img src="screenshot/currency_to_spinner_list.png" width="300" height="580">
+<img src="screenshot/currency_landscape.png" width="480" height="320">
+<img src="screenshot/currency_selection.png" width="240" height="560"> <img src="screenshot/historic_data_2.png" width="320" height="640">
+<img src="screenshot/subscription_error.png" width="320" height="480"> <img src="screenshot/no_internet_connection.png" width="240" height="560"> <img src="screenshot/no_result_error.png" width="320" height="480">
 
 
 # Libraries used
